@@ -239,16 +239,16 @@ Para que las curvas y la matriz se visualicen en GitHub, crea `docs/images/` y a
 
 ```text
 docs/images/
-├── accuracy-cnn.png
-├── loss-cnn.png
-├── accuracy-denso.png
-├── loss-denso.png
-├── accuracy-cnn-dropout.png
-├── loss-cnn-dropout.png
-└── matriz-confusion.png
+├── accuracy.png
+├── Loss.png
+├── denso Accuracy.png
+├── Denso Loss.png
+├── CNN+Dropout.png
+├── CNN+DropoutLoss.png
+└── Matriz de confusion.png
 ```
 
-En el README, utiliza rutas relativas como `![Matriz de confusión](docs/images/matriz-confusion.png)`. GitHub no podrá mostrar imágenes que solo existan en tu computador.
+
 
 ## 📁 Estructura orientativa
 
@@ -262,12 +262,6 @@ En el README, utiliza rutas relativas como `![Matriz de confusión](docs/images/
 │   └── group1-shard2of2.bin
 └── README.md
 ```
-
-La estructura anterior es orientativa: incluye los artefactos mencionados en el proyecto y debe ajustarse a los archivos que efectivamente se suban al repositorio.
-
-## 📄 Licencia y atribución de datos
-
-Antes de publicar el repositorio, revisa las licencias y condiciones de uso de ambos datasets y añade sus atribuciones o enlaces originales. Si todavía no has elegido una licencia para el código, puedes incorporar un archivo `LICENSE` con una licencia compatible con el uso que quieras permitir.
 
 ---
 
