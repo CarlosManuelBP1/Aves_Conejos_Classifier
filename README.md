@@ -1,65 +1,66 @@
 # 🐦🐇 Clasificador de Aves y Conejos con CNN
 
-Clasificador binario de imágenes que distingue entre **aves** y **conejos**, desarrollado con **TensorFlow/Keras**. El proyecto compara una red densa, una CNN y una CNN con Dropout, y exporta la CNN seleccionada a **TensorFlow.js** para su uso en una página web.
+Clasificador binario de imágenes (**ave** vs **conejo**) desarrollado con TensorFlow/Keras. Compara una red densa, una CNN y una CNN con Dropout, y exporta la CNN seleccionada a TensorFlow.js para usarla desde el navegador.
 
-> **Estado:** prototipo académico. Los resultados son prometedores, pero el conjunto de datos es pequeño y la evaluación externa muestra que todavía hay margen de mejora.
+**Autor:** Carlos Manuel Botero Patiño (código 14016)
+
+## 🔗 Enlaces
+
+| Recurso | Enlace |
+|---|---|
+| Aplicación web (Vercel) | https://avesconejosclassifier.vercel.app/ |
+| Notebook (Google Colab) | https://colab.research.google.com/drive/15xhRHSMzjUq17XjIRhtzpbc4Y2suBlaA?usp=sharing |
+| Informe | [Informe Aves Conejos.docx](Informe%20Aves%20Conejos.docx) |
+
+> **Estado:** prototipo académico. El conjunto de datos es pequeño y la prueba con fotos externas muestra que aún hay margen de mejora.
 
 ## 📌 Resultados principales
 
-| Modelo | `val_accuracy` | `val_loss` | Lectura |
-|---|---:|---:|---|
+| Modelo | val_accuracy | val_loss | Lectura |
+|---|---|---|---|
 | Red densa | 0.655 (65.5 %) | 0.639 | Rendimiento inferior a las CNN |
-| CNN | **0.891 (89.1 %)** | 0.450 | Mayor accuracy de validación |
-| CNN + Dropout | 0.873 (87.3 %) | **0.277** | Menor loss de validación |
+| CNN | 0.891 (89.1 %) | 0.450 | Mayor accuracy de validación |
+| CNN + Dropout | 0.873 (87.3 %) | 0.277 | Menor loss de validación |
 
-La **CNN sin Dropout** (`modeloCNN_AD`) fue la seleccionada para exportación. La CNN + Dropout obtuvo una pérdida menor, aunque su accuracy fue 1.8 puntos porcentuales inferior. Con solo 55 imágenes de validación, esta diferencia no debe considerarse concluyente.
+La CNN sin Dropout (`modeloCNN_AD`) fue la seleccionada para exportación. La CNN + Dropout obtuvo una pérdida menor, aunque su accuracy fue 1.8 puntos porcentuales inferior. Con solo 55 imágenes de validación, esta diferencia no es concluyente.
 
 ### Evaluación de la CNN exportada
 
-**Matriz de confusión** en 55 imágenes de validación:
+Matriz de confusión en 55 imágenes de validación:
 
 | Clase real | Predicha: Ave | Predicha: Conejo |
-|---|---:|---:|
+|---|---|---|
 | Ave | 22 | 5 |
 | Conejo | 4 | 24 |
 
-- **46/55 aciertos (83.6 %)** según los conteos de la matriz.
-- **Prueba externa:** 18/24 aciertos (75 %).
-- Aves: 9/12 (75 %).
-- Conejos: 9/12 (75 %).
+- Validación: 46/55 aciertos (83.6 %).
+- Prueba externa con 24 fotos propias: **18/24 (75 %)**, con 9/12 en aves y 9/12 en conejos.
 
-La matriz de confusión y `val_accuracy` pueden diferir porque las cifras se obtuvieron de evaluaciones o momentos distintos del entrenamiento. La prueba externa es una evaluación separada y no debe confundirse con la validación interna.
+La matriz y el `val_accuracy` de la tabla pueden diferir porque provienen de momentos distintos del entrenamiento: la tabla usa la mejor época y la matriz usa los pesos finales restaurados. La prueba externa es una evaluación aparte.
+
+![Matriz de confusión de la CNN](docs/images/Matriz%20de%20confusion.png)
 
 ## 🎯 Objetivo
 
-Comparar arquitecturas de redes neuronales para clasificar imágenes de dos clases:
+Comparar arquitecturas de redes neuronales para clasificar dos clases (Ave = 0, Conejo = 1) y dejar el modelo convolucional funcionando en una página web con TensorFlow.js.
 
-- **Ave** → etiqueta `0`
-- **Conejo** → etiqueta `1`
-
-Además, preparar el modelo convolucional para ejecutarlo desde el navegador mediante TensorFlow.js.
-
-## 🗂️ Datos utilizados
+## 🗂️ Datos
 
 | Clase | Fuente | Imágenes disponibles | Imágenes usadas |
-|---|---|---:|---:|
-| Ave | Bird Species Dataset (Kaggle) | 811, distribuidas en 6 especies | 182 |
+|---|---|---|---|
+| Ave | Bird Species Dataset (Kaggle) | 811 (6 especies) | 182 |
 | Conejo | Conejos Dataset v1 (Roboflow, formato COCO) | 182 | 182 |
 | **Total** | | | **364** |
 
-Especies de aves: Emperor Penguin, Carmine Bee-eater, Flamingo, American Goldfinch, Downy Woodpecker y Barn Owl.
-
-Del dataset de conejos se utilizaron las imágenes; las anotaciones JSON de COCO no son necesarias para esta tarea de clasificación. Se seleccionaron 182 aves para balancear las clases.
+Especies de aves: Emperor Penguin, Carmine Bee-eater, Flamingo, American Goldfinch, Downy Woodpecker y Barn Owl, repartidas de forma pareja. Del dataset de conejos solo se usan las imágenes; el JSON de anotaciones COCO no es necesario para clasificación.
 
 ## ⚙️ Preprocesamiento
 
-- Redimensionado a **100 × 100 píxeles**.
-- Conversión a **escala de grises** (un canal).
-- Normalización: píxeles divididos entre `255`, para obtener valores entre `0` y `1`.
-- División indicada en el proyecto: **85 % entrenamiento (309 imágenes)** y **15 % validación (55 imágenes)**.
-- Aumento de datos aplicado **solo al conjunto de entrenamiento**.
-
-Configuración de aumento de datos:
+- Redimensionado a 100 × 100 píxeles.
+- Escala de grises (un canal).
+- Normalización: píxeles ÷ 255.
+- División: 85 % entrenamiento (309 imágenes) y 15 % validación (55 imágenes).
+- Aumento de datos solo en entrenamiento:
 
 ```python
 ImageDataGenerator(
@@ -72,96 +73,75 @@ ImageDataGenerator(
 )
 ```
 
-No se aplica volteo vertical, para evitar transformaciones poco realistas.
+No se usa volteo vertical, por no ser realista para estos animales.
 
 ## 🧠 Modelos comparados
 
-| Modelo | Arquitectura resumida |
+| Modelo | Arquitectura |
 |---|---|
-| Red densa | `Flatten → Dense(150) → Dense(150) → Dense(1, sigmoid)` |
-| CNN | `3 × [Conv2D(32/64/128, 3×3) + MaxPooling] → Flatten → Dense(100) → Dense(1, sigmoid)` |
-| CNN + Dropout | Arquitectura convolucional con `Dropout(0.5)` y `Dense(250)` |
+| Red densa | Flatten → Dense(150) → Dense(150) → Dense(1, sigmoid) |
+| CNN | 3 × [Conv2D(32/64/128, 3×3) + MaxPooling] → Flatten → Dense(100) → Dense(1, sigmoid) |
+| CNN + Dropout | Igual que la CNN, con Dropout(0.5) antes de Flatten y Dense(250) |
 
-Configuración común reportada:
+Configuración común: optimizador Adam, pérdida `binary_crossentropy`, métrica accuracy, hasta 100 épocas, `EarlyStopping(patience=10, restore_best_weights=True)` y TensorBoard.
 
-- Optimizador: `Adam`
-- Función de pérdida: `binary_crossentropy`
-- Métrica: `accuracy`
-- Hasta 100 épocas
-- `EarlyStopping(patience=10, restore_best_weights=True)`
-- Seguimiento con TensorBoard
+## 📈 Curvas de entrenamiento
 
-### Matriz de confusión
+| | Accuracy | Loss |
+|---|---|---|
+| **CNN** | ![CNN accuracy](docs/images/accuracy.png) | ![CNN loss](docs/images/Loss.png) |
+| **Red densa** | ![Denso accuracy](docs/images/denso%20Accuracy.png) | ![Denso loss](docs/images/Denso%20Loss.png) |
+| **CNN + Dropout** | ![CNN + Dropout accuracy](docs/images/CNN%2BDropout.png) | ![CNN + Dropout loss](docs/images/CNN%2BDropoutLoss.png) |
 
-Si guardas la imagen en `docs/images/matriz-confusion.png`, puedes mostrarla directamente en GitHub:
+## 🔍 Interpretación
 
-![Matriz de confusión de la CNN](docs/images/matriz-confusion.png)
+- **Red densa:** curvas inestables y accuracy cercano al azar. Al aplanar la imagen desde el inicio, no aprovecha las relaciones espaciales como una CNN.
+- **CNN:** el mayor val_accuracy (89.1 %).
+- **CNN + Dropout:** el menor val_loss (0.277), lo que sugiere predicciones mejor calibradas.
+- **Fotos externas:** el 75 % de aciertos muestra que el rendimiento baja con imágenes de otro origen. Hubo confusiones con palomas blancas sobre fondos claros y con conejos negros, poco representados en el entrenamiento.
 
-La matriz contiene 22 aves y 24 conejos correctamente clasificados, con 9 errores en total.
+Accuracy mide la proporción de aciertos; loss también considera la confianza de las predicciones, por eso el modelo con más accuracy no siempre tiene menos loss.
 
-## 📈 Interpretación de los resultados
+## 🚀 Cómo reproducir el entrenamiento
 
-- **Red densa:** obtuvo menor accuracy y curvas variables. Al aplanar la imagen al inicio, no aprovecha de forma explícita las relaciones espaciales locales como una CNN.
-- **CNN:** logró el mayor `val_accuracy` (89.1 %).
-- **CNN + Dropout:** alcanzó el menor `val_loss` (0.277), aunque su accuracy fue ligeramente inferior a la CNN sin Dropout.
-- **Fotos externas:** el 75 % de aciertos muestra que el desempeño puede disminuir ante imágenes de otros orígenes. Se observaron confusiones con palomas blancas sobre fondos claros y conejos negros.
+1. Abre el [notebook en Colab](https://colab.research.google.com/drive/15xhRHSMzjUq17XjIRhtzpbc4Y2suBlaA?usp=sharing).
+2. Sube al panel de archivos `archive_birds.zip` y `Conejos Dataset.v1-wonejos.coco.zip` (también están en este repositorio).
+3. Ejecuta las celdas en orden: descomprimir, cargar y balancear, entrenar los tres modelos y evaluar.
 
-Accuracy mide la proporción de aciertos; loss también considera la confianza de las predicciones. Por ello, el modelo con mayor accuracy no necesariamente tiene la menor loss.
+Dependencias principales: `tensorflow`, `opencv-python`, `numpy`, `matplotlib`, `scikit-learn`.
 
-## 🚀 Cómo ejecutar el proyecto
+## 🌐 Exportación a TensorFlow.js
 
-El notebook usado en el proyecto es `Aves_Conejos.ipynb` y se desarrolló en Google Colab.
-
-1. Abre el notebook en Google Colab.
-2. Sube los archivos de datos esperados por el notebook:
-   - `archive_birds.zip`
-   - `Conejos Dataset.v1-wonejos.coco.zip`
-3. Ejecuta las celdas en orden para descomprimir, cargar, balancear y preprocesar los datos.
-4. Ejecuta el entrenamiento y la evaluación de los tres modelos.
-5. Revisa las curvas, la matriz de confusión y las pruebas externas.
-
-Dependencias principales: `tensorflow`, `opencv-python`, `numpy`, `matplotlib` y `scikit-learn`.
-
-> Los nombres de los archivos de datos deben coincidir con los que espera el notebook. Si se cambian, actualiza las rutas correspondientes.
-
-## 🌐 Exportar a TensorFlow.js
-
-El modelo seleccionado se guardó como `aves-conejos-cnn-ad.h5`. El flujo de exportación documentado utiliza `tensorflowjs` y `tf_keras`, reconstruyendo la arquitectura y copiando los pesos capa por capa para resolver incompatibilidades de versiones.
-
-En Google Colab, el proyecto utilizó:
+El modelo se guardó como `aves-conejos-cnn-ad.h5` y se convirtió con `tensorflowjs` y `tf_keras`. Fue necesario reconstruir la arquitectura en `tf_keras` y copiar los pesos capa por capa por incompatibilidades entre Keras 3 y el conversor. En Colab:
 
 ```python
 !pip install -q tensorflowjs tf_keras
 ```
 
-Después de reconstruir el modelo, se guarda en una carpeta de salida, por ejemplo `model_tfjs/`, que debe contener los archivos generados por el conversor. En el proyecto se reportaron:
+Resultado, en la carpeta `model_tfjs/`:
 
-```text
+```
 model_tfjs/
 ├── model.json
 ├── group1-shard1of2.bin
 └── group1-shard2of2.bin
 ```
 
-Todos estos archivos deben permanecer en la misma carpeta. Los comandos de conversión pueden requerir ajustes según las versiones instaladas de TensorFlow, Keras, TensorFlow.js y Python; conviene registrar esas versiones para reproducir el proceso.
+Los tres archivos deben estar en la misma carpeta.
 
-## 🖥️ Uso en una aplicación web
-
-Contrato de entrada/salida del modelo:
+## 🖥️ Uso del modelo en la web
 
 | Elemento | Especificación |
 |---|---|
 | Entrada | Imagen de 100 × 100, escala de grises, un canal |
 | Normalización | Valores de píxel entre 0 y 1 |
 | Salida | Número entre 0 y 1 |
-| Interpretación | `< 0.5` → Ave; `≥ 0.5` → Conejo |
+| Interpretación | < 0.5 → Ave; ≥ 0.5 → Conejo |
 
-Ejemplo ilustrativo con TensorFlow.js:
+```javascript
+const modelo = await tf.loadLayersModel("model_tfjs/model.json");
 
-```html
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-<script>
-async function clasificar(imgElement, modelo) {
+async function clasificar(imgElement) {
   const tensor = tf.tidy(() =>
     tf.browser.fromPixels(imgElement, 1)
       .resizeBilinear([100, 100])
@@ -169,7 +149,6 @@ async function clasificar(imgElement, modelo) {
       .div(255)
       .expandDims(0)
   );
-
   try {
     const p = (await modelo.predict(tensor).data())[0];
     return p < 0.5
@@ -179,96 +158,54 @@ async function clasificar(imgElement, modelo) {
     tensor.dispose();
   }
 }
-</script>
 ```
 
-Carga el modelo una sola vez con:
+La conversión a gris de `tf.browser.fromPixels` puede diferir ligeramente de la de OpenCV usada en el entrenamiento; si las predicciones no coinciden con las de Colab, revisa ese paso.
 
-```javascript
-const modelo = await tf.loadLayersModel("model_tfjs/model.json");
+### Ejecutar la aplicación en local
+
+La aplicación debe servirse desde un servidor, no abriendo el HTML directamente, para que se pueda cargar `model.json`:
+
+```bash
+cd ruta/del/repositorio
+python -m http.server 8000
 ```
 
-**Importante:** verifica que la transformación a escala de grises del navegador coincida con la usada durante el entrenamiento. `tf.browser.fromPixels(imgElement, 1)` puede no producir exactamente los mismos valores que OpenCV. Sirve la página desde un servidor local (por ejemplo, `python -m http.server`) en lugar de abrir el HTML directamente, para permitir la carga de `model.json`.
+Abre `http://localhost:8000` y detén el servidor con `Ctrl + C`. Si el puerto está ocupado, usa otro (por ejemplo `8001`).
 
-## ▶️ Ejecutar la aplicación web localmente
+## ⚠️ Limitaciones
 
-Para abrir la aplicación en tu navegador, inicia un servidor local desde la carpeta donde se encuentra el archivo principal de la web (por ejemplo, `index.html`).
-
-1. Abre una terminal.
-2. Ubícate en la carpeta de la aplicación. Por ejemplo:
-
-   ```bash
-   cd ruta/a/la/carpeta-de-la-app
-   ```
-
-3. Inicia el servidor con Python:
-
-   ```bash
-   python -m http.server 8000
-   ```
-
-4. Mantén la terminal abierta mientras utilizas la aplicación.
-5. Abre tu navegador y visita **http://localhost:8000**.
-6. Si la aplicación está dentro de una subcarpeta, entra a su ruta desde el navegador.
-
-Para detener el servidor, vuelve a la terminal y presiona `Ctrl + C`.
-
-**Importante:** Python publica la carpeta desde la que ejecutaste el comando y sus subcarpetas. Asegúrate de que `index.html` y la carpeta del modelo (`model_tfjs/`, con `model.json` y los archivos `.bin`) estén en las rutas esperadas por el código. Si el puerto `8000` está ocupado, puedes iniciar el servidor con `python -m http.server 8001` y abrir **http://localhost:8001**.
-
-## ⚠️ Limitaciones conocidas
-
-- Solo 364 imágenes en el conjunto balanceado; la validación contiene 55.
-- Representación limitada de especies y apariencias, especialmente conejos oscuros.
+- Solo 364 imágenes en el conjunto balanceado; la validación tiene 55.
+- Poca variedad de especies y de apariencias, sobre todo conejos oscuros.
 - La escala de grises y el tamaño 100 × 100 eliminan información visual.
-- La validación interna puede ser optimista respecto a fotografías externas.
-- No se reportan intervalos de confianza ni resultados promedio de múltiples ejecuciones.
+- La validación interna puede ser optimista frente a fotos externas.
+- No hay intervalos de confianza ni promedios de varias ejecuciones.
 
 ## 🔭 Mejoras futuras
 
-1. Ampliar la cantidad y diversidad de imágenes, incluyendo conejos negros/grises y aves de más especies.
-2. Crear un conjunto de prueba independiente antes de ajustar hiperparámetros.
-3. Evaluar imágenes a color y una resolución mayor, por ejemplo 150 × 150.
-4. Probar *transfer learning* con MobileNetV2 u otra red preentrenada.
-5. Reportar precision, recall, F1-score y métricas por clase.
-6. Repetir entrenamientos con distintas semillas y reportar media y desviación estándar.
-7. Revisar posibles duplicados y diferencias entre fuentes de datos.
+- Ampliar y diversificar los datos (conejos negros y grises, más especies de aves).
+- Usar imágenes a color y mayor resolución (150 × 150).
+- Probar transfer learning (por ejemplo MobileNetV2).
+- Reportar precision, recall y F1 por clase.
+- Crear un conjunto de prueba independiente y repetir entrenamientos con distintas semillas.
 
-## 🖼️ Figuras del proyecto
+## 📁 Estructura del repositorio
 
-Para que las curvas y la matriz se visualicen en GitHub, crea `docs/images/` y añade allí las imágenes con nombres sencillos, por ejemplo:
-
-```text
-docs/images/
-├── accuracy-cnn.png
-├── loss-cnn.png
-├── accuracy-denso.png
-├── loss-denso.png
-├── accuracy-cnn-dropout.png
-├── loss-cnn-dropout.png
-└── matriz-confusion.png
 ```
-
-En el README, utiliza rutas relativas como `![Matriz de confusión](docs/images/matriz-confusion.png)`. GitHub no podrá mostrar imágenes que solo existan en tu computador.
-
-## 📁 Estructura orientativa
-
-```text
 .
-├── Aves_Conejos.ipynb
-├── aves-conejos-cnn-ad.h5
-├── model_tfjs/
+├── index.html                      # Aplicación web
+├── model_tfjs/                     # Modelo exportado a TensorFlow.js
 │   ├── model.json
 │   ├── group1-shard1of2.bin
 │   └── group1-shard2of2.bin
+├── docs/images/                    # Gráficas y matriz de confusión
+├── metricas/                       # Métricas y resultados del proyecto
+├── archive_birds.zip               # Dataset de aves
+├── Conejos Dataset.v1-wonejos.coco.zip   # Dataset de conejos
+├── Informe Aves Conejos.docx       # Informe del proyecto
 └── README.md
 ```
 
-La estructura anterior es orientativa: incluye los artefactos mencionados en el proyecto y debe ajustarse a los archivos que efectivamente se suban al repositorio.
+## ✅ Conclusión
 
-## 📄 Licencia y atribución de datos
-
-Antes de publicar el repositorio, revisa las licencias y condiciones de uso de ambos datasets y añade sus atribuciones o enlaces originales. Si todavía no has elegido una licencia para el código, puedes incorporar un archivo `LICENSE` con una licencia compatible con el uso que quieras permitir.
-
----
-
-**Resumen:** las CNN ofrecen una mejora clara frente a la red densa en este experimento. La CNN fue seleccionada por su mayor accuracy de validación; la CNN + Dropout obtuvo menor loss. La evaluación externa (75 %) indica que ampliar la diversidad de datos y validar con un conjunto independiente son los siguientes pasos más importantes.
+Las CNN mejoran claramente a la red densa en este experimento. Se seleccionó la CNN por su mayor accuracy de validación, mientras que la CNN + Dropout obtuvo menor loss. La prueba externa (75 %) indica que ampliar la diversidad de datos y validar con un conjunto independiente son los siguientes pasos más importantes.
