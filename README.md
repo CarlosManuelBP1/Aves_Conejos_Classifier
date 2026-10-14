@@ -191,7 +191,28 @@ Abre `http://localhost:8000` y detén el servidor con `Ctrl + C`. Si el puerto e
 
 ## 📁 Estructura del repositorio
 
+<<<<<<< HEAD
 ```
+=======
+Para que las curvas y la matriz se visualicen en GitHub, crea `docs/images/` y añade allí las imágenes con nombres sencillos, por ejemplo:
+
+```text
+docs/images/
+├── accuracy.png
+├── Loss.png
+├── denso Accuracy.png
+├── Denso Loss.png
+├── CNN+Dropout.png
+├── CNN+DropoutLoss.png
+└── Matriz de confusion.png
+```
+
+
+
+## 📁 Estructura orientativa
+
+```text
+>>>>>>> 9059d474f32c59eed5cb6f9add6bf73ef2c0805a
 .
 ├── index.html                      # Aplicación web
 ├── model_tfjs/                     # Modelo exportado a TensorFlow.js
@@ -206,6 +227,12 @@ Abre `http://localhost:8000` y detén el servidor con `Ctrl + C`. Si el puerto e
 └── README.md
 ```
 
+<<<<<<< HEAD
 ## ✅ Conclusión
 
 Las CNN mejoran claramente a la red densa en este experimento. Se seleccionó la CNN por su mayor accuracy de validación, mientras que la CNN + Dropout obtuvo menor loss. La prueba externa (75 %) indica que ampliar la diversidad de datos y validar con un conjunto independiente son los siguientes pasos más importantes.
+=======
+---
+
+**Resumen:** las CNN ofrecen una mejora clara frente a la red densa en este experimento. La CNN fue seleccionada por su mayor accuracy de validación; la CNN + Dropout obtuvo menor loss. La evaluación externa (75 %) indica que ampliar la diversidad de datos y validar con un conjunto independiente son los siguientes pasos más importantes.
+>>>>>>> 9059d474f32c59eed5cb6f9add6bf73ef2c0805a
