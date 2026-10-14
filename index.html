@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Red Neuronal de Clasificación para Conejos y Aves - Carlos Manuel Botero</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.35);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --bird-color: #38bdf8;
+            --rabbit-color: #ec4899;
+            --uncertain-color: #f59e0b;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-section {
+            background: radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
+            padding: 2.5rem 1rem 1.5rem;
+        }
+
+        .author-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #c7d2fe;
+            padding: 0.35rem 0.9rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.03em;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1.25rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.6);
+        }
+
+        .canvas-container {
+            position: relative;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: #020617;
+            display: inline-block;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            max-width: 100%;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+
+        .nav-pills-custom .nav-link {
+            color: var(--text-muted);
+            border-radius: 0.75rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .nav-pills-custom .nav-link.active {
+            background: var(--accent-primary);
+            color: #ffffff;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .nav-pills-custom .nav-link:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-modern {
+            background: var(--accent-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.6rem 1.25rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-modern:hover {
+            background: var(--accent-hover);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .btn-modern-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0.75rem;
+            padding: 0.6rem 1.25rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-modern-outline:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        .result-badge {
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            min-height: 4rem;
+        }
+
+        .result-rabbit {
+            color: var(--rabbit-color);
+            filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.5));
+        }
+
+        .result-bird {
+            color: var(--bird-color);
+            filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.5));
+        }
+
+        .result-uncertain {
+            color: var(--uncertain-color);
+            filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.5));
+            font-size: 2.2rem;
+        }
+
+        .prob-bar-container {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 0.6rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 0.75rem;
+        }
+
+        .prob-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .prob-bar {
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .prob-fill-bird {
+            height: 100%;
+            background: linear-gradient(90deg, #0284c7, #38bdf8);
+            border-radius: 5px;
+            transition: width 0.2s ease-out;
+        }
+
+        .prob-fill-rabbit {
+            height: 100%;
+            background: linear-gradient(90deg, #db2777, #ec4899);
+            border-radius: 5px;
+            transition: width 0.2s ease-out;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-loading {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-ready {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .upload-dropzone {
+            border: 2px dashed rgba(99, 102, 241, 0.4);
+            border-radius: 1rem;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .upload-dropzone:hover,
+        .upload-dropzone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .model-info-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.35rem;
+            display: inline-block;
+        }
+
+        /* Modal Styles */
+        .modal-content-custom {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1.25rem;
+            color: var(--text-main);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-header-custom {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .metric-img-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+
+        .metric-img-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .metric-img-card img {
+            border-radius: 0.5rem;
+            width: 100%;
+            height: auto;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        footer {
+            margin-top: auto;
+            border-top: 1px solid var(--card-border);
+            background: rgba(15, 23, 42, 0.95);
+            padding: 2rem 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Hero Header -->
+    <header class="hero-section text-center">
+        <div class="container">
+            <div class="author-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Carlos Manuel Botero</span>
+            </div>
+
+            <h1 class="display-5 fw-bold mb-2">Red Neuronal de Clasificación para Conejos y Aves</h1>
+            <p class="lead text-muted mx-auto mb-3" style="max-width: 680px;">
+                Clasificación inteligente en tiempo real mediante red neuronal convolucional (CNN) entrenada en escala
+                de grises (100x100) y ejecutada con TensorFlow.js.
+            </p>
+
+            <div class="d-flex justify-content-center align-items-center gap-2 flex-wrap">
+                <!-- Model Load Status Indicator -->
+                <span id="model-status" class="status-pill status-loading">
+                    <span class="spinner-border spinner-border-sm" role="status"
+                        style="width: 0.8rem; height: 0.8rem;"></span>
+                    Cargando modelo desde model_tfjs/model.json...
+                </span>
+
+                <!-- Metrics Modal Trigger Button -->
+                <button class="btn btn-sm btn-modern-outline" data-bs-toggle="modal" data-bs-target="#metricasModal">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    Ver Métricas de Entrenamiento
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <!-- Alert if loaded directly via file:// and blocked by browser CORS -->
+        <div id="cors-notice" class="alert alert-warning d-none text-start mx-auto"
+            style="max-width: 850px; background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: #fde68a;">
+            <strong>Nota sobre ejecución local:</strong> Si abres este archivo directamente como <code>file:///</code>,
+            el navegador puede restringir la lectura de <code>model_tfjs/model.json</code> por políticas de CORS. Para
+            ejecutarlo con total normalidad, puedes usar la extensión <em>Live Server</em> de VS Code o ejecutar en la
+            terminal: <code>python -m http.server 8000</code> o <code>npx serve</code>.
+        </div>
+
+        <div class="row g-4 justify-content-center">
+
+            <!-- Left Panel: Input View & Camera -->
+            <div class="col-12 col-lg-6">
+                <div class="glass-card p-4 text-center">
+
+                    <!-- Mode Switcher Tabs -->
+                    <ul class="nav nav-pills nav-pills-custom justify-content-center mb-3" id="inputTabs"
+                        role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="camera-tab" onclick="activarModo('camara')">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" class="me-1" style="vertical-align: text-bottom;">
+                                    <path
+                                        d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                                    </path>
+                                    <circle cx="12" cy="13" r="4"></circle>
+                                </svg>
+                                Cámara Web
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="upload-tab" onclick="activarModo('archivo')">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" class="me-1" style="vertical-align: text-bottom;">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                Subir Imagen
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Camera View Wrapper -->
+                    <div id="seccion-camara">
+                        <div class="canvas-container mb-3">
+                            <video id="video" playsinline autoplay muted style="display: none;"></video>
+                            <canvas id="canvas" width="400" height="400"></canvas>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-2 flex-wrap mb-2">
+                            <button class="btn btn-modern" id="cambiar-camara" onclick="cambiarCamara();">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                                </svg>
+                                Cambiar Cámara
+                            </button>
+                            <button class="btn btn-modern-outline" id="pausar-camara" onclick="alternarCamara();">
+                                Pausar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Wrapper -->
+                    <div id="seccion-archivo" class="d-none">
+                        <div class="upload-dropzone mb-3" id="dropzone"
+                            onclick="document.getElementById('input-archivo').click();">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6366f1"
+                                stroke-width="1.8" class="mb-2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                            <h5 class="fw-bold mb-1">Haz clic o arrastra una imagen aquí</h5>
+                            <p class="text-muted small mb-0">Formatos compatibles: JPG, PNG, WEBP</p>
+                            <input type="file" id="input-archivo" accept="image/*" style="display: none;"
+                                onchange="cargarImagenArchivo(event)">
+                        </div>
+                    </div>
+
+                    <!-- Grayscale Processing Canvas (hidden) -->
+                    <canvas id="otrocanvas" width="100" height="100" style="display: none;"></canvas>
+
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-2 flex-wrap">
+                        <span class="model-info-tag">Entrada: 100x100 Grayscale</span>
+                        <span class="model-info-tag" id="fps-counter">Inferencia: -- ms</span>
+                        <span class="model-info-tag" id="smoothing-tag">Filtro: Suave (Media Móvil)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Results & Probabilities -->
+            <div class="col-12 col-lg-6">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2"
+                            style="border-color: var(--card-border) !important;">
+                            <h4 class="fw-bold mb-0">Predicción en Tiempo Real</h4>
+                            <span class="badge bg-primary rounded-pill px-3 py-2" id="prediction-pill">Analizando</span>
+                        </div>
+
+                        <!-- Result Display Box -->
+                        <div class="p-3 text-center my-3 rounded-3"
+                            style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border);">
+                            <div class="text-muted small text-uppercase fw-bold letter-spacing-1">Clase Detectada</div>
+                            <div id="resultado" class="result-badge">
+                                <span>Esperando señal...</span>
+                            </div>
+                            <div id="confianza-texto" class="text-muted small">Apunta la cámara a un ave o a un conejo
+                            </div>
+                        </div>
+
+                        <!-- Probability Distribution Bars -->
+                        <div class="mt-4">
+                            <h6 class="fw-bold text-muted text-uppercase small mb-3">Distribución de Probabilidades</h6>
+
+                            <!-- Bird (Ave) Probability -->
+                            <div class="prob-bar-container">
+                                <div class="prob-header">
+                                    <span style="color: var(--bird-color);">
+                                        🐦 Ave (Aves)
+                                    </span>
+                                    <span id="prob-ave-val" style="color: var(--bird-color);">0.0%</span>
+                                </div>
+                                <div class="prob-bar">
+                                    <div class="prob-fill-bird" id="bar-ave" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Rabbit (Conejo) Probability -->
+                            <div class="prob-bar-container">
+                                <div class="prob-header">
+                                    <span style="color: var(--rabbit-color);">
+                                        🐰 Conejo (Conejos)
+                                    </span>
+                                    <span id="prob-conejo-val" style="color: var(--rabbit-color);">0.0%</span>
+                                </div>
+                                <div class="prob-bar">
+                                    <div class="prob-fill-rabbit" id="bar-conejo" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Neural Network Architecture Specs -->
+                    <div class="mt-4 pt-3 border-top" style="border-color: var(--card-border) !important;">
+                        <div class="row text-center text-muted small g-2">
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-dark bg-opacity-50">
+                                    <div class="fw-bold text-white">Conv2D</div>
+                                    <div style="font-size: 0.7rem;">32/64/128 Filtros</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-dark bg-opacity-50">
+                                    <div class="fw-bold text-white">Dense</div>
+                                    <div style="font-size: 0.7rem;">100 Unidades ReLU</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="p-2 rounded bg-dark bg-opacity-50">
+                                    <div class="fw-bold text-white">Salida</div>
+                                    <div style="font-size: 0.7rem;">Sigmoid (0-1)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal de Métricas del Modelo -->
+    <div class="modal fade" id="metricasModal" tabindex="-1" aria-labelledby="metricasModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="metricasModalLabel">
+                            📊 Métricas de Entrenamiento y Evaluación
+                        </h5>
+                        <p class="text-muted small mb-0">Red Neuronal Convolucional para Conejos y Aves &bull; Carlos
+                            Manuel Botero</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+
+                    <!-- Ficha Resumen -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 rounded-3 text-center"
+                                style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.25);">
+                                <div class="text-muted small text-uppercase fw-bold">Arquitectura</div>
+                                <div class="h5 fw-bold text-white mb-0">CNN Keras</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 rounded-3 text-center"
+                                style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25);">
+                                <div class="text-muted small text-uppercase fw-bold">Entrada</div>
+                                <div class="h5 fw-bold text-white mb-0">100x100 (Gris)</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 rounded-3 text-center"
+                                style="background: rgba(236, 72, 153, 0.1); border: 1px solid rgba(236, 72, 153, 0.25);">
+                                <div class="text-muted small text-uppercase fw-bold">Clases</div>
+                                <div class="h5 fw-bold text-white mb-0">Ave (0) / Conejo (1)</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 rounded-3 text-center"
+                                style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25);">
+                                <div class="text-muted small text-uppercase fw-bold">Framework Web</div>
+                                <div class="h5 fw-bold text-white mb-0">TensorFlow.js</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Métricas Visuales -->
+                    <div class="row g-4">
+                        <!-- Accuracy -->
+                        <div class="col-12 col-md-6">
+                            <div class="metric-img-card h-100">
+                                <h6 class="fw-bold text-white mb-2">📈 Curva de Precisión (Accuracy)</h6>
+                                <p class="text-muted small mb-3">Evolución del porcentaje de acierto en los conjuntos de
+                                    entrenamiento y validación a través de las épocas.</p>
+                                <img src="metricas/Accuracy.png" alt="Curva de Precisión (Accuracy)" loading="lazy">
+                            </div>
+                        </div>
+
+                        <!-- Loss -->
+                        <div class="col-12 col-md-6">
+                            <div class="metric-img-card h-100">
+                                <h6 class="fw-bold text-white mb-2">📉 Curva de Pérdida (Loss)</h6>
+                                <p class="text-muted small mb-3">Reducción del error (Binary Crossentropy) durante la
+                                    convergencia y optimización del modelo.</p>
+                                <img src="metricas/Loss.png" alt="Curva de Pérdida (Loss)" loading="lazy">
+                            </div>
+                        </div>
+
+                        <!-- Confusion Matrix -->
+                        <div class="col-12">
+                            <div class="metric-img-card">
+                                <h6 class="fw-bold text-white mb-2">🎯 Matriz de Confusión</h6>
+                                <p class="text-muted small mb-3">Evaluación cruzada de aciertos y errores entre las
+                                    clases reales y las predicciones del modelo (Verdaderos Positivos vs Falsos
+                                    Positivos).</p>
+                                <div class="text-center">
+                                    <img src="metricas/Matriz de confusion.png" alt="Matriz de Confusión"
+                                        style="max-width: 600px;" loading="lazy">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer modal-header-custom">
+                    <button type="button" class="btn btn-modern" data-bs-dismiss="modal">Entendido / Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <h5 class="fw-bold text-white mb-1">Carlos Manuel Botero</h5>
+            <p class="text-muted mb-2">Red neuronal de clasificación para conejos y aves</p>
+            <p class="small text-secondary mb-0">
+                Modelo entrenado con Keras y exportado a TensorFlow.js &bull; Procesamiento local en el navegador del
+                cliente
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <!-- TensorFlow.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+
+    <script type="text/javascript">
+        // Parámetros y elementos de la interfaz
+        const tamano = 400;
+        const modeloTamano = 100; // El modelo espera 100x100 grayscale
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const otrocanvas = document.getElementById("otrocanvas");
+        const ctx = canvas.getContext("2d");
+        const ctx2 = otrocanvas.getContext("2d");
+
+        let currentStream = null;
+        let facingMode = "user";
+        let modelo = null;
+        let camaraActiva = true;
+        let modoActual = "camara"; // 'camara' o 'archivo'
+        let animacionCamaraId = null;
+        let loopPrediccionId = null;
+
+        // Historial para suavizado temporal (media móvil)
+        const historialVentana = 4;
+        let historialProbabilidades = [];
+
+        // Carga del modelo TensorFlow.js desde la carpeta model_tfjs/model.json
+        async function cargarModelo() {
+            const statusEl = document.getElementById("model-status");
+            try {
+                console.log("Cargando modelo convolucional desde model_tfjs/model.json...");
+                modelo = await tf.loadLayersModel("model_tfjs/model.json");
+                console.log("Modelo cargado exitosamente:", modelo);
+
+                statusEl.className = "status-pill status-ready";
+                statusEl.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Modelo listo (model_tfjs)
+                `;
+            } catch (err) {
+                console.error("Error al cargar el modelo:", err);
+                statusEl.className = "status-pill status-error";
+                statusEl.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    Error al cargar model_tfjs/model.json
+                `;
+                if (window.location.protocol === "file:") {
+                    document.getElementById("cors-notice").classList.remove("d-none");
+                }
+            }
+        }
+
+        window.onload = async function () {
+            await cargarModelo();
+            mostrarCamara();
+        };
+
+        // Gestión de la cámara web
+        function mostrarCamara() {
+            const opciones = {
+                audio: false,
+                video: {
+                    facingMode: facingMode,
+                    width: { ideal: tamano },
+                    height: { ideal: tamano }
+                }
+            };
+
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia(opciones)
+                    .then(function (stream) {
+                        currentStream = stream;
+                        video.srcObject = currentStream;
+                        camaraActiva = true;
+                        procesarCamara();
+                        iniciarCicloPrediccion();
+                    })
+                    .catch(function (err) {
+                        console.warn("No se pudo iniciar la cámara web:", err);
+                        const res = document.getElementById("resultado");
+                        if (res) {
+                            res.innerHTML = `<span style="font-size: 1.5rem; color: #94a3b8;">Cámara no disponible</span>`;
+                            document.getElementById("confianza-texto").innerText = "Puedes usar la pestaña 'Subir Imagen' para probar el clasificador";
+                        }
+                    });
+            } else {
+                alert("Tu navegador no soporta acceso a la cámara (getUserMedia).");
+            }
+        }
+
+        function cambiarCamara() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            facingMode = facingMode === "user" ? "environment" : "user";
+            mostrarCamara();
+        }
+
+        function alternarCamara() {
+            const btn = document.getElementById("pausar-camara");
+            if (camaraActiva) {
+                video.pause();
+                camaraActiva = false;
+                btn.innerText = "Reanudar";
+            } else {
+                video.play();
+                camaraActiva = true;
+                btn.innerText = "Pausar";
+                procesarCamara();
+            }
+        }
+
+        function procesarCamara() {
+            if (!camaraActiva || modoActual !== "camara") return;
+
+            if (video.readyState >= 2) {
+                const vWidth = video.videoWidth;
+                const vHeight = video.videoHeight;
+                const minSide = Math.min(vWidth, vHeight);
+                const startX = (vWidth - minSide) / 2;
+                const startY = (vHeight - minSide) / 2;
+
+                ctx.drawImage(video, startX, startY, minSide, minSide, 0, 0, tamano, tamano);
+            }
+            animacionCamaraId = requestAnimationFrame(procesarCamara);
+        }
+
+        function iniciarCicloPrediccion() {
+            if (loopPrediccionId) clearTimeout(loopPrediccionId);
+
+            function loop() {
+                if (modoActual === "camara" && camaraActiva) {
+                    predecir();
+                }
+                loopPrediccionId = setTimeout(loop, 110);
+            }
+            loop();
+        }
+
+        // Predicción con la red neuronal convolucional
+        function predecir() {
+            if (!modelo) return;
+
+            const tInicio = performance.now();
+
+            // Redimensionar canvas a 100x100 para la entrada del modelo
+            resample_single(canvas, modeloTamano, modeloTamano, otrocanvas);
+
+            const imgData = ctx2.getImageData(0, 0, modeloTamano, modeloTamano);
+
+            // Conversión a escala de grises y normalización [0, 1]
+            const arr100x100 = [];
+            let fila = [];
+
+            for (let p = 0; p < imgData.data.length; p += 4) {
+                const r = imgData.data[p] / 255;
+                const g = imgData.data[p + 1] / 255;
+                const b = imgData.data[p + 2] / 255;
+
+                // Promedio para escala de grises (1 canal)
+                const gris = (r + g + b) / 3;
+
+                fila.push([gris]);
+                if (fila.length === modeloTamano) {
+                    arr100x100.push(fila);
+                    fila = [];
+                }
+            }
+
+            // Inferencia protegida con tf.tidy para liberar memoria y evitar memory leaks
+            let probInstantanea = 0.5;
+            tf.tidy(() => {
+                const tensor = tf.tensor4d([arr100x100], [1, modeloTamano, modeloTamano, 1], "float32");
+                const prediccion = modelo.predict(tensor);
+                probInstantanea = prediccion.dataSync()[0];
+            });
+
+            // Aplicar suavizado temporal (Media Móvil)
+            historialProbabilidades.push(probInstantanea);
+            if (historialProbabilidades.length > historialVentana) {
+                historialProbabilidades.shift();
+            }
+
+            const suma = historialProbabilidades.reduce((a, b) => a + b, 0);
+            const probSuavizada = suma / historialProbabilidades.length;
+
+            const duracion = Math.round(performance.now() - tInicio);
+            document.getElementById("fps-counter").innerText = `Inferencia: ${duracion} ms`;
+
+            actualizarResultados(probSuavizada);
+        }
+
+        // Actualización de métricas en la interfaz
+        function actualizarResultados(probabilidad) {
+            // Orden alfabético estándar en dataset de Keras (aves=0, conejos=1)
+            const probConejo = Math.min(Math.max(probabilidad, 0), 1);
+            const probAve = 1 - probConejo;
+
+            const pctAve = (probAve * 100).toFixed(1);
+            const pctConejo = (probConejo * 100).toFixed(1);
+
+            // Actualizar barras de probabilidad
+            document.getElementById("bar-ave").style.width = `${pctAve}%`;
+            document.getElementById("prob-ave-val").innerText = `${pctAve}%`;
+
+            document.getElementById("bar-conejo").style.width = `${pctConejo}%`;
+            document.getElementById("prob-conejo-val").innerText = `${pctConejo}%`;
+
+            const resultadoDiv = document.getElementById("resultado");
+            const confianzaTexto = document.getElementById("confianza-texto");
+            const predictionPill = document.getElementById("prediction-pill");
+
+            // Umbral de incertidumbre (entre 44% y 56%)
+            if (probConejo >= 0.44 && probConejo <= 0.56) {
+                resultadoDiv.className = "result-badge result-uncertain";
+                resultadoDiv.innerHTML = `<span>🔍</span> <span>Analizando...</span>`;
+                confianzaTexto.innerHTML = `Nivel de incertidumbre alto &bull; Enfoca mejor al animal`;
+                predictionPill.className = "badge bg-warning text-dark rounded-pill px-3 py-2";
+                predictionPill.innerText = "Incierto";
+            } else if (probConejo > 0.56) {
+                resultadoDiv.className = "result-badge result-rabbit";
+                resultadoDiv.innerHTML = `<span>🐰</span> <span>Conejo</span>`;
+                confianzaTexto.innerHTML = `Confianza: <strong style="color: var(--rabbit-color);">${pctConejo}%</strong>`;
+                predictionPill.className = "badge rounded-pill px-3 py-2";
+                predictionPill.style.backgroundColor = "var(--rabbit-color)";
+                predictionPill.innerText = "Conejo";
+            } else {
+                resultadoDiv.className = "result-badge result-bird";
+                resultadoDiv.innerHTML = `<span>🐦</span> <span>Ave</span>`;
+                confianzaTexto.innerHTML = `Confianza: <strong style="color: var(--bird-color);">${pctAve}%</strong>`;
+                predictionPill.className = "badge rounded-pill px-3 py-2";
+                predictionPill.style.backgroundColor = "var(--bird-color)";
+                predictionPill.innerText = "Ave";
+            }
+        }
+
+        // Cambio de modos (Cámara Web vs Subir Imagen)
+        function activarModo(modo) {
+            modoActual = modo;
+            historialProbabilidades = []; // Reiniciar buffer de media móvil
+            const tabCam = document.getElementById("camera-tab");
+            const tabArch = document.getElementById("upload-tab");
+            const secCam = document.getElementById("seccion-camara");
+            const secArch = document.getElementById("seccion-archivo");
+
+            if (modo === "camara") {
+                tabCam.classList.add("active");
+                tabArch.classList.remove("active");
+                secCam.classList.remove("d-none");
+                secArch.classList.add("d-none");
+                if (video.srcObject) {
+                    video.play();
+                    camaraActiva = true;
+                    procesarCamara();
+                } else {
+                    mostrarCamara();
+                }
+            } else {
+                tabArch.classList.add("active");
+                tabCam.classList.remove("active");
+                secCam.classList.remove("d-none");
+                secArch.classList.remove("d-none");
+                camaraActiva = false;
+                if (video.srcObject) {
+                    video.pause();
+                }
+            }
+        }
+
+        // Cargar imagen local para clasificación directa
+        function cargarImagenArchivo(evento) {
+            const archivo = evento.target.files[0];
+            if (!archivo) return;
+
+            const lector = new FileReader();
+            lector.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    ctx.clearRect(0, 0, tamano, tamano);
+                    const minSide = Math.min(img.width, img.height);
+                    const startX = (img.width - minSide) / 2;
+                    const startY = (img.height - minSide) / 2;
+                    ctx.drawImage(img, startX, startY, minSide, minSide, 0, 0, tamano, tamano);
+
+                    // Forzar predicción directa en la imagen cargada
+                    historialProbabilidades = [];
+                    predecir();
+                };
+                img.src = e.target.result;
+            };
+            lector.readAsDataURL(archivo);
+        }
+
+        // Configuración de Drag and Drop para subir imágenes
+        const dropzone = document.getElementById("dropzone");
+        if (dropzone) {
+            dropzone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropzone.classList.add("dragover");
+            });
+            dropzone.addEventListener("dragleave", () => {
+                dropzone.classList.remove("dragover");
+            });
+            dropzone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropzone.classList.remove("dragover");
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    document.getElementById("input-archivo").files = e.dataTransfer.files;
+                    cargarImagenArchivo({ target: { files: e.dataTransfer.files } });
+                }
+            });
+        }
+
+        /**
+         * Algoritmo de interpolación Hermite para reescalado nítido de imágenes a 100x100
+         */
+        function resample_single(canvasSource, width, height, resize_canvas) {
+            const width_source = canvasSource.width;
+            const height_source = canvasSource.height;
+            width = Math.round(width);
+            height = Math.round(height);
+
+            const ratio_w = width_source / width;
+            const ratio_h = height_source / height;
+            const ratio_w_half = Math.ceil(ratio_w / 2);
+            const ratio_h_half = Math.ceil(ratio_h / 2);
+
+            const ctxSource = canvasSource.getContext("2d");
+            const ctxTarget = resize_canvas.getContext("2d");
+            const img = ctxSource.getImageData(0, 0, width_source, height_source);
+            const img2 = ctxTarget.createImageData(width, height);
+            const data = img.data;
+            const data2 = img2.data;
+
+            for (let j = 0; j < height; j++) {
+                for (let i = 0; i < width; i++) {
+                    const x2 = (i + j * width) * 4;
+                    let weight = 0;
+                    let weights = 0;
+                    let weights_alpha = 0;
+                    let gx_r = 0, gx_g = 0, gx_b = 0, gx_a = 0;
+                    const center_y = (j + 0.5) * ratio_h;
+                    const yy_start = Math.floor(j * ratio_h);
+                    const yy_stop = Math.ceil((j + 1) * ratio_h);
+
+                    for (let yy = yy_start; yy < yy_stop; yy++) {
+                        const dy = Math.abs(center_y - (yy + 0.5)) / ratio_h_half;
+                        const center_x = (i + 0.5) * ratio_w;
+                        const w0 = dy * dy;
+                        const xx_start = Math.floor(i * ratio_w);
+                        const xx_stop = Math.ceil((i + 1) * ratio_w);
+
+                        for (let xx = xx_start; xx < xx_stop; xx++) {
+                            const dx = Math.abs(center_x - (xx + 0.5)) / ratio_w_half;
+                            const w = Math.sqrt(w0 + dx * dx);
+                            if (w >= 1) continue;
+
+                            weight = 2 * w * w * w - 3 * w * w + 1;
+                            const pos_x = 4 * (xx + yy * width_source);
+
+                            gx_a += weight * data[pos_x + 3];
+                            weights_alpha += weight;
+
+                            if (data[pos_x + 3] < 255) {
+                                weight = weight * data[pos_x + 3] / 250;
+                            }
+                            gx_r += weight * data[pos_x];
+                            gx_g += weight * data[pos_x + 1];
+                            gx_b += weight * data[pos_x + 2];
+                            weights += weight;
+                        }
+                    }
+
+                    data2[x2] = gx_r / weights;
+                    data2[x2 + 1] = gx_g / weights;
+                    data2[x2 + 2] = gx_b / weights;
+                    data2[x2 + 3] = gx_a / weights_alpha;
+                }
+            }
+
+            ctxTarget.putImageData(img2, 0, 0);
+        }
+    </script>
+</body>
+
+</html>
