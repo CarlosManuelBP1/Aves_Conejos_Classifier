@@ -198,12 +198,12 @@ Para que las curvas y la matriz se visualicen en GitHub, crea `docs/images/` y a
 
 ```text
 docs/images/
-├── accuracy.png
+├── Accuracy.png
 ├── Loss.png
 ├── denso Accuracy.png
 ├── Denso Loss.png
 ├── CNN+Dropout.png
-├── CNN+DropoutLoss.png
+├── CNN+Dropout Loss.png
 └── Matriz de confusion.png
 ```
 
