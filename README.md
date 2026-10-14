@@ -87,11 +87,9 @@ Configuración común: optimizador Adam, pérdida `binary_crossentropy`, métric
 
 ## 📈 Curvas de entrenamiento
 
-| | Accuracy | Loss |
-|---|---|---|
-| **CNN** | ![CNN accuracy](docs/images/accuracy.png) | ![CNN loss](docs/images/Loss.png) |
-| **Red densa** | ![Denso accuracy](docs/images/denso%20Accuracy.png) | ![Denso loss](docs/images/Denso%20Loss.png) |
-| **CNN + Dropout** | ![CNN + Dropout accuracy](docs/images/CNN%2BDropout.png) | ![CNN + Dropout loss](docs/images/CNN%2BDropoutLoss.png) |
+![Curvas de accuracy y loss de los tres modelos](docs/images/Accuracy.png)
+
+*De arriba abajo: red densa, CNN y CNN + Dropout (accuracy a la izquierda, loss a la derecha).*
 
 ## 🔍 Interpretación
 
